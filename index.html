@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Amor 🗓️💖</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #fdf6f0;
+            --card-bg: #ffffff;
+            --primary-pink: #f4a2b3;
+            --deep-pink: #e86a82;
+            --accent-purple: #a855f7;
+            --text-main: #4a3b32;
+            --text-muted: #8c7b70;
+            --grid-border: #ebdcd5;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#e0cfc5 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--deep-pink);
+            margin-bottom: 5px;
+        }
+
+        p.subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .month-picker {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0 25px;
+            background: var(--card-bg);
+            padding: 8px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .btn-nav {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--deep-pink);
+            transition: transform 0.2s;
+        }
+
+        .btn-nav:hover {
+            transform: scale(1.2);
+        }
+
+        .current-month {
+            font-size: 1.3rem;
+            font-weight: 700;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            border: 3px solid #ffffff;
+        }
+
+        .weekday-header {
+            text-align: center;
+            font-weight: 700;
+            color: var(--accent-purple);
+            font-size: 0.9rem;
+            padding-bottom: 8px;
+        }
+
+        .day-card {
+            aspect-ratio: 1;
+            background: #fff8f6;
+            border: 2px solid var(--grid-border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .day-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-pink);
+            background: #fff0f3;
+        }
+
+        .day-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .day-card.special-day {
+            background: linear-gradient(135deg, #fce7f3, #f472b6);
+            border-color: #ec4899;
+            color: #831843;
+            animation: pulseSpecial 2s infinite;
+        }
+
+        @keyframes pulseSpecial {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .day-icon {
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
+
+        /* MODAL POPUP */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 28px;
+            max-width: 480px;
+            width: 100%;
+            padding: 30px 25px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border: 4px solid var(--primary-pink);
+        }
+
+        .modal-date {
+            font-size: 0.95rem;
+            color: var(--accent-purple);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .modal-message {
+            font-family: 'Caveat', cursive;
+            font-size: 1.8rem;
+            color: var(--text-main);
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .music-box {
+            background: #fdf2f8;
+            border: 2px dashed #f472b6;
+            border-radius: 16px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .music-info {
+            text-align: left;
+        }
+
+        .music-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #be185d;
+        }
+
+        .music-artist {
+            font-size: 0.85rem;
+            color: #9d174d;
+        }
+
+        .btn-listen {
+            background: #db2777;
+            color: white;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-listen:hover {
+            background: #be185d;
+        }
+
+        .btn-close {
+            background: var(--deep-pink);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(232, 106, 130, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 500px) {
+            .calendar-grid { gap: 6px; padding: 12px; }
+            .day-number { font-size: 0.95rem; }
+            .modal-message { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>365 Dias de Amor 🗓️💖</h1>
+        <p class="subtitle">Uma mensagem especial e uma música para cada dia do ano</p>
+
+        <div class="month-picker">
+            <button class="btn-nav" onclick="changeMonth(-1)">❮</button>
+            <div class="current-month" id="month-display">Janeiro</div>
+            <button class="btn-nav" onclick="changeMonth(1)">❯</button>
+        </div>
+    </header>
+
+    <div class="calendar-grid" id="calendar-grid"></div>
+
+    <!-- MODAL POPUP -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content">
+            <div class="modal-date" id="modal-date">01 DE JANEIRO</div>
+            <div class="modal-message" id="modal-message">Suas palavras me acolhem todos os dias.</div>
+            
+            <div class="music-box">
+                <div class="music-info">
+                    <div class="music-title" id="music-title">Equalize</div>
+                    <div class="music-artist" id="music-artist">Pitty</div>
+                </div>
+                <a href="#" target="_blank" class="btn-listen" id="music-link">Ouvir 🎵</a>
+            </div>
+
+            <button class="btn-close" onclick="forceCloseModal()">Fechar 💕</button>
+        </div>
+    </div>
+
+    <script>
+        const mesesNomes = [
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+
+        const diasNosMeses = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        // BASE DE DADOS DOS 365 DIAS (COM MENSAGENS SEM TOQUE FÍSICO, "EU TE AMO" E MÚSICAS ROMÂNTICAS)
+        const baseDeDados = [
+            // JANEIRO
+            { msg: "Que este novo ano seja apenas mais um capítulo da história linda que estamos escrevendo juntos.", musica: "Ocean Eyes", cantor: "Billie Eilish" },
+            { msg: "Eu te amo! Amar você é a decisão mais fácil e bonita que tomo todos os dias.", musica: "Equalize", cantor: "Pitty" },
+            { msg: "O seu sorriso é meu porto seguro e meu motivo favorito para sorrir.", musica: "Agora Hills", cantor: "Doja Cat" },
+            { msg: "Com você, as conversas mais simples se transformam em memórias inesquecíveis.", musica: "Leal", cantor: "Djonga" },
+            { msg: "Não importa a distância ou a rotina, meu coração sempre escolhe você. Eu te amo!", musica: "Coisas da Vida", cantor: "Rita Lee" },
+            { msg: "Obrigado por me fazer sentir a pessoa mais amada do mundo.", musica: "Singular", cantor: "Anavitória" },
+            { msg: "Sua voz é o melhor lugar para minha mente descansar.", musica: "Eu Te Amo", cantor: "Chico Buarque" },
+            { msg: "Cada detalhe em você me faz ter certeza de que nos conectamos da melhor forma.", musica: "Poesia Acústica #2", cantor: "Poesia Acústica" },
+            { msg: "Ter você na minha vida é a maior das minhas certezas.", musica: "Exagerado", cantor: "Cazuza" },
+            { msg: "Amo a forma leve como você cuida das nossas conversas. Eu te amo!", musica: "Eduardo e Mônica", cantor: "Legião Urbana" },
+            { msg: "Minha mente escolhe pensar em você em qualquer momento vago.", musica: "O Amor Vai Salvar o Mundo", cantor: "Pullovers" },
+            { msg: "Seu olhar através da tela tem uma luz única que ilumina o meu dia.", musica: "Idiota", cantor: "Jão" },
+            { msg: "Eu te amo pelo que você é e pelo bem que me faz existir na sua vida.", musica: "Everything I Wanted", cantor: "Billie Eilish" },
+            { msg: "Você é o meu pensamento favorito do dia inteiro.", musica: "Na Sua Estante", cantor: "Pitty" },
+            { msg: "Dividir meus dias com você transforma qualquer instante numa certeza alegre.", musica: "Love To Dream", cantor: "Doja Cat" },
+            { msg: "A vida ganhou cores muito mais bonitas depois que você chegou.", musica: "Gente Grande", cantor: "Djonga" },
+            { msg: "Se o amor fosse uma música, você seria a minha melodia preferida. Eu te amo!", musica: "Mania de Você", cantor: "Rita Lee" },
+            { msg: "Amar você me ensina diariamente o verdadeiro significado de felicidade.", musica: "Trevo (Tu)", cantor: "Anavitória" },
+            { msg: "Minha paz tem nome, sobrenome e a voz mais acolhedora do mundo: você.", musica: "A Rita", cantor: "Chico Buarque" },
+            { msg: "Não há nada mais gostoso do que ouvir a sua risada numa chamada.", musica: "Poesia Acústica #6", cantor: "Poesia Acústica" },
+            { msg: "Prometo te apoiar, te ouvir e dizer que eu te amo em todas as fases da vida.", musica: "Codinome Beija-Flor", cantor: "Cazuza" },
+            { msg: "Você é o meu sonho bonito que virou realidade.", musica: "A Via Láctea", cantor: "Legião Urbana" },
+            { msg: "Obrigado por transformar minha rotina em poesia.", musica: "Não Se Mande Embora", cantor: "Pullovers" },
+            { msg: "O tempo quando conversamos passa voando, mas as lembranças duram para sempre.", musica: "Acontece", cantor: "Jão" },
+            { msg: "Você é a combinação perfeita de afeto, cumplicidade e alegrias.", musica: "i love you", cantor: "Billie Eilish" },
+            { msg: "Meu amor por você cresce e se renova a cada amanhecer. Eu te amo!", musica: "Admirável Chip Novo", cantor: "Pitty" },
+            { msg: "Colecionar momentos e histórias com você é o meu passatempo favorito.", musica: "Casual", cantor: "Doja Cat" },
+            { msg: "Com você aprendi que amar de verdade é ser livre para ser quem eu sou.", musica: "Atipico", cantor: "Djonga" },
+            { msg: "Você é a minha pessoa favorita em todo o universo.", musica: "Lança Perfume", cantor: "Rita Lee" },
+            { msg: "Saber da sua atenção me dá forças para enfrentar qualquer desafio. Eu te amo!", musica: "Fica", cantor: "Anavitória" },
+            { msg: "Janeiro acaba, mas o meu amor por você é infinito.", musica: "João e Maria", cantor: "Chico Buarque" },
+
+            // FEVEREIRO
+            { msg: "Cada segundo em sintonia com você vale mais do que mil dias de solidão.", musica: "Poesia Acústica #9", cantor: "Poesia Acústica" },
+            { msg: "O som da sua voz acalma qualquer tempestade dentro do meu coração.", musica: "O Tempo Não Para", cantor: "Cazuza" },
+            { msg: "Eu te amo! Te amar é a jornada mais incrível que eu poderia trilhar.", musica: "Quase Sem Querer", cantor: "Legião Urbana" },
+            { msg: "O destino acertou em cheio quando cruzou os nossos caminhos.", musica: "Vinho de Morango", cantor: "Pullovers" },
+            { msg: "Seu carinho e atenção são o remédio para qualquer dia cansativo.", musica: "Santo", cantor: "Jão" },
+            { msg: "Te ver sorrir na câmera é o destaque de todo o meu dia.", musica: "Lovely", cantor: "Billie Eilish" },
+            { msg: "Você é o presente mais bonito que a vida colocou no meu caminho. Eu te amo!", musica: "Teto de Vidro", cantor: "Pitty" },
+            { msg: "Amo o jeito que a gente se entende apenas pelas mensagens.", musica: "I Don't Do Drugs", cantor: "Doja Cat" },
+            { msg: "O mundo fica mais bonito e seguro sabendo que tenho você.", musica: "Evolução", cantor: "Djonga" },
+            { msg: "Meu coração bate na frequência do seu carinho.", musica: "Baila Comigo", cantor: "Rita Lee" },
+            { msg: "Você é o abrigo onde minha alma encontra serenidade e paz. Eu te amo!", musica: "Porque Eu Te Amo", cantor: "Anavitória" },
+            { msg: "Amar você é construir um futuro repleto de esperança.", musica: "Construção", cantor: "Chico Buarque" },
+            { msg: "Sou imensamente grato por cada gargalhada que trocamos todos os dias.", musica: "Poesia Acústica #3", cantor: "Poesia Acústica" },
+            { msg: "Seu amor me inspira a ser a minha melhor versão diariamente.", musica: "Faz Parte Do Meu Show", cantor: "Cazuza" },
+            { msg: "Com você, até as conversas mais longas parecem durar segundos. Eu te amo!", musica: "Tempo Perdido", cantor: "Legião Urbana" },
+            { msg: "Você é meu ponto de paz em meio ao caos do mundo.", musica: "1999", cantor: "Pullovers" },
+            { msg: "Não importa a distância, nossa conexão é inabalável.", musica: "Meninos e Meninas", cantor: "Jão" },
+            { msg: "Amo nossa cumplicidade e a alegria de todas as nossas piadas internas.", musica: "Halley's Comet", cantor: "Billie Eilish" },
+            { msg: "Eu te amo de todo o coração e esse é o meu sentimento mais sincero.", musica: "Máscara", cantor: "Pitty" },
+            { msg: "Se eu tivesse mil vidas, escolheria me conectar com você em todas elas.", musica: "Agora Hills", cantor: "Doja Cat" },
+            { msg: "Você é o meu porto seguro e minha constante inspiração.", musica: "Solitude", cantor: "Djonga" },
+            { msg: "O amor que sinto por você não cabe em palavras. Eu te amo!", musica: "Desculpe o Auê", cantor: "Rita Lee" },
+            { msg: "Nossa história é a minha narrativa favorita do mundo inteiro.", musica: "Cor de Marte", cantor: "Anavitória" },
+            { msg: "Obrigado por me amar com todo o respeito e carinho que você demonstra.", musica: "Cotidiano", cantor: "Chico Buarque" },
+            { msg: "Sua mensagem ao acordar renova todas as minhas energias.", musica: "Poesia Acústica #13", cantor: "Poesia Acústica" },
+            { msg: "Você torna a minha caminhada pela vida infinitamente mais doce. Eu te amo!", musica: "Preciso Dizer Que Te Amo", cantor: "Cazuza" },
+            { msg: "Meu coração é e sempre será todinho seu.", musica: "Índios", cantor: "Legião Urbana" },
+            { msg: "Seu carinho chega até mim através de cada palavra.", musica: "Olhos Vermelhos", cantor: "Pullovers" },
+
+            // MARÇO
+            { msg: "Março chega trazendo ainda mais motivos para eu te dizer: eu te amo!", musica: "Olhos Vermelhos", cantor: "Jão" },
+            { msg: "Te amar é como sentir a luz do sol trazendo paz num dia novo.", musica: "Birds of a Feather", cantor: "Billie Eilish" },
+            { msg: "Você é a poesia mais bonita que o destino já colocou na minha vida.", musica: "Me Adora", cantor: "Pitty" },
+            { msg: "Minha vida é infinitamente melhor porque você está nela. Eu te amo!", musica: "Agora Eu Quero Ir", cantor: "Anavitória" },
+            { msg: "A doçura do seu coração me encanta todos os dias.", musica: "Chega de Saudade", cantor: "Tom Jobim" },
+            { msg: "Não há nada no mundo que pague a paz de conversar com você.", musica: "Sorte Grande", cantor: "Ivete Sangalo" },
+            { msg: "Você é o melhor presente que recebi dos céus.", musica: "Velha Infância", cantor: "Tribalistas" },
+            { msg: "Estar conectado a você me dá a certeza de estar no caminho certo.", musica: "Um Anjo do Cratim", cantor: "Cazuza" },
+            { msg: "Amo o brilho sincero que vejo nas suas fotos quando você sorri. Eu te amo!", musica: "Vento no Litoral", cantor: "Legião Urbana" },
+            { msg: "Você é o motivo do meu sorriso mais sincero todos os dias.", musica: "Cinga", cantor: "Pullovers" },
+            { msg: "Com você aprendi o que é parceria e consideração de verdade.", musica: "Piloto", cantor: "Flora Matos" },
+            { msg: "Ter você é ter a certeza de que nunca estarei sozinho na caminhada.", musica: "Wildflower", cantor: "Billie Eilish" },
+            { msg: "O seu carinho através das mensagens transforma o meu dia. Eu te amo!", musica: "Pulsos", cantor: "Pitty" },
+            { msg: "Sou apaixonado pela pessoa incrível e especial que você é.", musica: "Love To Dream", cantor: "Doja Cat" },
+            { msg: "Você é a minha sorte grande na vida.", musica: "Deus É Mulher", cantor: "Djonga" },
+            { msg: "Cada instante de conversa vira uma lembrança preciosa.", musica: "Doce Comparsa", cantor: "Rita Lee" },
+            { msg: "O amor que construímos à distância é a minha maior riqueza. Eu te amo!", musica: "Lisboa", cantor: "Anavitória" },
+            { msg: "Seu sorriso em chamada ilumina o meu caminho em qualquer momento.", musica: "Aita", cantor: "Chico Buarque" },
+            { msg: "Prometo continuar te conquistando todos os dias da minha vida.", musica: "Poesia Acústica #4", cantor: "Poesia Acústica" },
+            { msg: "Falar com você é como sentir que encontrei meu verdadeiro lugar.", musica: "Pro Dia Nascer Feliz", cantor: "Cazuza" },
+            { msg: "Você trouxe um novo sentido e um rumo lindo para eu seguir. Eu te amo!", musica: "Monte Castelo", cantor: "Legião Urbana" },
+            { msg: "Amo nosso jeito divertido e leve de conversar sobre tudo.", musica: "Tudo Que Eu Sempre Quis", cantor: "Pullovers" },
+            { msg: "Você é meu aconchego, meu carinho e meu amor verdadeiro.", musica: "Claridade", cantor: "Jão" },
+            { msg: "Obrigado por ser tão compreensivo e atencioso comigo.", musica: "TV", cantor: "Billie Eilish" },
+            { msg: "Te amar torna o mundo um lugar muito mais bonito de se viver. Eu te amo!", musica: "Memórias", cantor: "Pitty" },
+            { msg: "Nosso amor é um refúgio de paz, carinho e respeito mútuo.", musica: "Casual", cantor: "Doja Cat" },
+            { msg: "Você é o grande amor da minha vida inteira.", musica: "Junho de 94", cantor: "Djonga" },
+            { msg: "Saber que posso contar com você traz um conforto enorme.", musica: "Caso Sério", cantor: "Rita Lee" },
+            { msg: "Que a nossa caminhada seja sempre repleta de amor e sorrisos. Eu te amo!", musica: "Dengo", cantor: "Anavitória" },
+            { msg: "Ao seu lado, o futuro parece um lugar lindo para se viver.", musica: "Samba do Avião", cantor: "Chico Buarque" },
+            { msg: "Eu te amo ontem, eu te amo hoje e eu te amarei por todos os amanhãs.", musica: "Poesia Acústica #11", cantor: "Poesia Acústica" },
+
+            // ABRIL
+            { msg: "Abril começa com a certeza de que meu amor por você só aumenta. Eu te amo!", musica: "Brisa", cantor: "IZA" },
+            { msg: "Você transforma pequenos gestos em demonstrações gigantes de afeto.", musica: "Ainda Bem", cantor: "Marisa Monte" },
+            { msg: "Amar você dá um tom especial a cada momento da minha rotina.", musica: "Pela Luz dos Olhos Teus", cantor: "Tom Jobim" },
+            { msg: "Amo ver você empolgado com as coisas que mais gosta de fazer.", musica: "Partilhar", cantor: "Rubel & Anavitória" },
+            { msg: "Sua existência torna o mundo um lugar muito mais gentil. Eu te amo!", musica: "Lindo Lago do Amor", cantor: "Gonzaguinha" },
+            { msg: "Sua voz é o meu refúgio favorito em todo o universo.", musica: "Sozinho", cantor: "Caetano Veloso" },
+            { msg: "Obrigado por me ouvir sempre com tanta paciência e carinho.", musica: "Como Nossos Pais", cantor: "Elis Regina" },
+            { msg: "Você é o meu maior incentivo e a minha inspiração diária.", musica: "Por Você", cantor: "Frejat" },
+            { msg: "A vida é mais leve e alegre quando nos apoiamos mutuamente. Eu te amo!", musica: "Meu Abrigo", cantor: "Melim" },
+            { msg: "100 dias de mensagens e ainda faltam palavras para descrever o amor que sinto por você!", musica: "Acreditar", cantor: "Dona Ivone Lara" },
+            { msg: "Meu coração encontrou o lar perfeito na nossa conexão.", musica: "Deus Me Proteja", cantor: "Chico César" },
+            { msg: "A doçura das suas palavras acalma qualquer inquietação.", musica: "Fogo e Paixão", cantor: "Wando" },
+            { msg: "Eu te amo! Amar você é a melhor parte de todos os meus dias.", musica: "Evidências", cantor: "Chitãozinho & Xororó" },
+            { msg: "Você é o meu raio de sol num dia nublado.", musica: "Gostava Tanto de Você", cantor: "Tim Maia" },
+            { msg: "Adoro a conexão mágica que existe entre nós dois.", musica: "Anunciação", cantor: "Alceu Valença" },
+            { msg: "Nosso amor é calmo, bonito, maduro e acolhedor.", musica: "Fascinação", cantor: "Elis Regina" },
+            { msg: "Você é o sonho bonito do qual nunca quero me afastar. Eu te amo!", musica: "Carinhoso", cantor: "Pixinguinha" },
+            { msg: "Sua presença nas chamadas traz uma calma profunda para minha alma.", musica: "Canteiros", cantor: "Fagner" },
+            { msg: "Amar você é o sentimento mais puro e verdadeiro que já vivi.", musica: "O Leãozinho", cantor: "Caetano Veloso" },
+            { msg: "Obrigado por estar presente com tanta dedicação.", musica: "Travessia", cantor: "Milton Nascimento" },
+            { msg: "Nosso amor se fortalece a cada conversa e a cada risada. Eu te amo!", musica: "Asa Branca", cantor: "Luiz Gonzaga" },
+            { msg: "Você tem um lugar único e eterno no meu coração.", musica: "Trem das Onze", cantor: "Adoniran Barbosa" },
+            { msg: "Com você aprendi que o amor está na atenção aos detalhes.", musica: "O Bêbado e a Equilibrista", cantor: "Elis Regina" },
+            { msg: "O seu sorriso em fotos faz com que qualquer dia valha a pena.", musica: "Sampa", cantor: "Caetano Veloso" },
+            { msg: "É maravilhoso dividir a vida, os planos e os sonhos com você. Eu te amo!", musica: "Pais e Filhos", cantor: "Legião Urbana" },
+            { msg: "Eu te amo! Amar você é tão natural quanto respirar.", musica: "Metamorfose Ambulante", cantor: "Raul Seixas" },
+            { msg: "Seu carinho é a melhor companhia que minha alma pode ter.", musica: "Proibida Pra Mim", cantor: "Charlie Brown Jr." },
+            { msg: "Colecionar dias felizes ao seu lado é minha missão de vida.", musica: "A Sombra da Partida", cantor: "Pullovers" },
+            { msg: "Você traz leveza e uma alegria sem fim para a minha rotina. Eu te amo!", musica: "Sido", cantor: "Jão" },
+            { msg: "Meu amor por você transcende qualquer barreira da distância.", musica: "Bellyache", cantor: "Billie Eilish" },
+
+            // MAIO
+            { msg: "Que o mês de maio floresça ainda mais o nosso amor. Eu te amo!", musica: "De Serpente", cantor: "Pitty" },
+            { msg: "Você é a luz que guia meus passos e alegra meu coração.", musica: "I Don't Do Drugs", cantor: "Doja Cat" },
+            { msg: "Amo a facilidade com que fazemos piada de qualquer coisa.", musica: "Hat-trick", cantor: "Djonga" },
+            { msg: "O seu apoio me dá a coragem de ir atrás de todos os meus sonhos.", musica: "Flagra", cantor: "Rita Lee" },
+            { msg: "Você é a minha sintonia perfeita e meu encaixe ideal. Eu te amo!", musica: "Trevo", cantor: "Anavitória" },
+            { msg: "Amar você renova minha esperança no futuro a cada dia.", musica: "Roda Viva", cantor: "Chico Buarque" },
+            { msg: "Nosso amor é um lugar seguro onde sempre posso recarregar energias.", musica: "Poesia Acústica #1", cantor: "Poesia Acústica" },
+            { msg: "Obrigado por me dar os melhores motivos para sorrir todos os dias.", musica: "Maior Abandonado", cantor: "Cazuza" },
+            { msg: "Suas palavras carinhosas têm o poder de me acalmar. Eu te amo!", musica: "Será", cantor: "Legião Urbana" },
+            { msg: "Saber que você existe na minha vida é a maior garantia de paz.", musica: "Sonho de Voo", cantor: "Pullovers" },
+            { msg: "Amo tudo em você, desde seu jeito de falar até seu olhar atento.", musica: "Louca", cantor: "Jão" },
+            { msg: "Você é a melhor escolha que já fiz em toda a minha vida. Eu te amo!", musica: "Happier Than Ever", cantor: "Billie Eilish" },
+            { msg: "Pensando em nós, não sinto medo do futuro, sinto entusiasmo.", musica: "Dança da Solidão", cantor: "Pitty" },
+            { msg: "O amor que sinto por você cresce e se consolida a cada dia.", musica: "Love To Dream", cantor: "Doja Cat" },
+            { msg: "Você tem a capacidade linda de transformar dias comuns em especiais.", musica: "Lugar ao Sol", cantor: "Djonga" },
+            { msg: "Sua voz fala ao meu coração com uma serenidade incomparável. Eu te amo!", musica: "Ovelha Negra", cantor: "Rita Lee" },
+            { msg: "Nosso companheirismo é um presente inestimável do universo.", musica: "Explodir", cantor: "Anavitória" },
+            { msg: "Você é o primeiro pensamento da minha manhã e o último da noite.", musica: "Apesartar de Você", cantor: "Chico Buarque" },
+            { msg: "Amar você é viver com a certeza de que a vida é bonita. Eu te amo!", musica: "Poesia Acústica #5", cantor: "Poesia Acústica" },
+            { msg: "Minha vida é mais colorida desde o dia em que te conheci.", musica: "O Tempo Não Para", cantor: "Cazuza" },
+            { msg: "Cada mensagem sua recarrega tudo o que há de bom em mim.", musica: "A Via Láctea", cantor: "Legião Urbana" },
+            { msg: "Obrigado por cuidar das minhas emoções com tanta delicadeza.", musica: "Vinho de Morango", cantor: "Pullovers" },
+            { msg: "Você é o parceiro de vida com quem sempre quis contar. Eu te amo!", musica: "Vou Morrer Sozinho", cantor: "Jão" },
+            { msg: "O que sinto por você é verdadeiro, sincero e infinito.", musica: "Ocean Eyes", cantor: "Billie Eilish" },
+            { msg: "Sua risada no áudio é uma das minhas coisas favoritas no mundo.", musica: "Equalize", cantor: "Pitty" },
+            { msg: "Você é o meu maior orgulho e minha maior felicidade.", musica: "Agora Hills", cantor: "Doja Cat" },
+            { msg: "Te amar me faz enxergar a beleza na simplicidade da atenção. Eu te amo!", musica: "Leal", cantor: "Djonga" },
+            { msg: "Nosso amor é construído sobre bases fortes de respeito e afinidade.", musica: "Coisas da Vida", cantor: "Rita Lee" },
+            { msg: "Conversar com você me faz querer ser alguém melhor a cada instante.", musica: "Singular", cantor: "Anavitória" },
+            { msg: "Metade do ano se aproxima e meu afeto por você só se multiplica! Eu te amo!", musica: "Eu Te Amo", cantor: "Chico Buarque" },
+            { msg: "Maio se despede, mas a nossa cumplicidade continua radiante.", musica: "Poesia Acústica #7", cantor: "Poesia Acústica" },
+
+            // JUNHO
+            { msg: "Junho chega para iluminar ainda mais a nossa história. Eu te amo!", musica: "Exagerado", cantor: "Cazuza" },
+            { msg: "Você é a minha pessoa especial, meu porto e minha alegria.", musica: "Eduardo e Mônica", cantor: "Legião Urbana" },
+            { msg: "Amo construir planos e sonhar com nosso futuro juntos.", musica: "O Amor Vai Salvar o Mundo", cantor: "Pullovers" },
+            { msg: "Te amar me enche de uma gratidão profunda e constante. Eu te amo!", musica: "Idiota", cantor: "Jão" },
+            { msg: "Você é a brisa leve que traz serenidade aos meus dias.", musica: "Lovely", cantor: "Billie Eilish" },
+            { msg: "Seu olhar sincero acalma qualquer agitação no meu interior.", musica: "Na Sua Estante", cantor: "Pitty" },
+            { msg: "É incrível como o tempo voa quando estamos conversando.", musica: "Casual", cantor: "Doja Cat" },
+            { msg: "Eu te amo! Amar você é a jornada mais doce de se viver.", musica: "Gente Grande", cantor: "Djonga" },
+            { msg: "Você é o amor da minha vida, ontem, hoje e para sempre.", musica: "Mania de Você", cantor: "Rita Lee" },
+            { msg: "Meu afeto por você é imenso e não para de crescer.", musica: "Trevo (Tu)", cantor: "Anavitória" },
+            { msg: "Eu te amo! Falar com você renova minha alegria de viver.", musica: "A Rita", cantor: "Chico Buarque" },
+            { msg: "Feliz Dia dos Namorados! Você é meu melhor presente. Eu te amo!", musica: "Poesia Acústica #8", cantor: "Poesia Acústica" },
+            { msg: "Amar você é encontrar significado em cada conversa sincera.", musica: "Codinome Beija-Flor", cantor: "Cazuza" },
+            { msg: "Sua consideração é minha fortaleza nos momentos difíceis.", musica: "Tempo Perdido", cantor: "Legião Urbana" },
+            { msg: "Amo o jeito atencioso e carinhoso com que você me trata. Eu te amo!", musica: "Não Se Mande Embora", cantor: "Pullovers" },
+            { msg: "Com você, qualquer conversa simples vira o melhor momento do dia.", musica: "Acontece", cantor: "Jão" },
+            { msg: "Ter você é saber que tenho alguém incrível torcendo por mim.", musica: "Everything I Wanted", cantor: "Billie Eilish" },
+            { msg: "A felicidade mora na certeza da nossa sintonia. Eu te amo!", musica: "Teto de Vidro", cantor: "Pitty" },
+            { msg: "Você é o meu maior presente de todos os dias.", musica: "Love To Dream", cantor: "Doja Cat" },
+            { msg: "Amar você é um privilégio do qual cuido com todo a dedicação.", musica: "Evolução", cantor: "Djonga" },
+            { msg: "Nosso sentimento é puro, bonito e cheio de reciprocidade. Eu te amo!", musica: "Lança Perfume", cantor: "Rita Lee" },
+            { msg: "Você ilumina meus dias e alegra a minha alma.", musica: "Fica", cantor: "Anavitória" },
+            { msg: "A paz que sinto sabendo do seu carinho é indescritível.", musica: "João e Maria", cantor: "Chico Buarque" },
+            { msg: "Obrigado por me entender até através de pequenas mensagens.", musica: "Poesia Acústica #2", cantor: "Poesia Acústica" },
+            { msg: "Você transforma a rotina numa constante descoberta feliz. Eu te amo!", musica: "Preciso Dizer Que Te Amo", cantor: "Cazuza" },
+            { msg: "Meu coração sorri toda vez que vejo uma notificação sua.", musica: "Quase Sem Querer", cantor: "Legião Urbana" },
+            { msg: "Você é a melhor parte de todas as minhas histórias.", musica: "Santo", cantor: "Jão" },
+            { msg: "Amo a atenção e a dedicação da sua presença diária. Eu te amo!", musica: "Wildflower", cantor: "Billie Eilish" },
+            { msg: "Te amar me traz a certeza de que a vida é generosa.", musica: "Admirável Chip Novo", cantor: "Pitty" },
+            { msg: "Chegamos na metade do ano e meu amor por você está cada vez mais forte! Eu te amo!", musica: "I Don't Do Drugs", cantor: "Doja Cat" },
+
+            // JULHO
+            { msg: "Julho começa com a mesma certeza de sempre: eu te amo!", musica: "Atipico", cantor: "Djonga" },
+            { msg: "Sua atenção aquece meu coração em qualquer dia frio.", musica: "Baila Comigo", cantor: "Rita Lee" },
+            { msg: "Amo caminhar e planejar o amanhã ao seu lado.", musica: "Porque Eu Te Amo", cantor: "Anavitória" },
+            { msg: "Você é a paz que meu coração tanto procurava. Eu te amo!", musica: "Construção", cantor: "Chico Buarque" },
+            { msg: "Seu apoio e carinho são o melhor alívio para qualquer cansaço.", musica: "Poesia Acústica #10", cantor: "Poesia Acústica" },
+            { msg: "Amar você é ver beleza no mundo todos os dias.", musica: "Faz Parte Do Meu Show", cantor: "Cazuza" },
+            { msg: "Nossa história é feita de respeito, risadas e muito afeto. Eu te amo!", musica: "Índios", cantor: "Legião Urbana" },
+            { msg: "Você é a estrela mais brilhante do meu céu.", musica: "1999", cantor: "Pullovers" },
+            { msg: "Com você aprendi a dar valor ao que realmente importa no amor.", musica: "Meninos e Meninas", cantor: "Jão" },
+            { msg: "O som da sua voz é a minha trilha sonora favorita. Eu te amo!", musica: "i love you", cantor: "Billie Eilish" },
+            { msg: "Obrigado por ser tão companheiro e leal em cada conversa.", musica: "Me Adora", cantor: "Pitty" },
+            { msg: "Seu carinho traz um colorido todo especial aos meus dias.", musica: "Agora Hills", cantor: "Doja Cat" },
+            { msg: "Te amar me dá a certeza de que o amor verdadeiro existe. Eu te amo!", musica: "Solitude", cantor: "Djonga" },
+            { msg: "Você é o meu grande refúgio de paz e minha maior alegria.", musica: "Desculpe o Auê", cantor: "Rita Lee" },
+            { msg: "Amo quando conversamos sobre a vida por horas a fio.", musica: "Cor de Marte", cantor: "Anavitória" },
+            { msg: "Saber que você pensa em mim é uma sensação maravilhosa. Eu te amo!", musica: "Cotidiano", cantor: "Chico Buarque" },
+            { msg: "Você é o maior presente que a vida colocou na minha jornada.", musica: "Poesia Acústica #12", cantor: "Poesia Acústica" },
+            { msg: "Amar você traz leveza para o meu coração e paz para a alma.", musica: "Pro Dia Nascer Feliz", cantor: "Cazuza" },
+            { msg: "200 dias de mensagens e o mesmo sentimento lindo: eu te amo de verdade!", musica: "Monte Castelo", cantor: "Legião Urbana" },
+            { msg: "Você tem a minha total confiança e o melhor do meu afeto.", musica: "Olhos Vermelhos", cantor: "Pullovers" },
+            { msg: "É lindo ver a forma como a gente cuida um do outro à distância. Eu te amo!", musica: "Claridade", cantor: "Jão" },
+            { msg: "Ter o seu afeto é a maior riqueza da minha vida.", musica: "Halley's Comet", cantor: "Billie Eilish" },
+            { msg: "Amo todas as nossas conversas e a certeza da nossa parceria.", musica: "Pulsos", cantor: "Pitty" },
+            { msg: "Você é meu ponto de apoio em qualquer circunstância. Eu te amo!", musica: "Casual", cantor: "Doja Cat" },
+            { msg: "Amar você é o hábito mais gostoso do meu dia.", musica: "Deus É Mulher", cantor: "Djonga" },
+            { msg: "Sua doçura guia os meus pensamentos com muito amor.", musica: "Doce Comparsa", cantor: "Rita Lee" },
+            { msg: "Obrigado por me incentivar em todos os meus objetivos. Eu te amo!", musica: "Lisboa", cantor: "Anavitória" },
+            { msg: "Seu carinho me faz sentir a pessoa mais especial do mundo.", musica: "Aita", cantor: "Chico Buarque" },
+            { msg: "Com você o amor é simples, calmo, maduro e verdadeiro.", musica: "Poesia Acústica #4", cantor: "Poesia Acústica" },
+            { msg: "Nosso amor é uma chama constante que ilumina nossa vida. Eu te amo!", musica: "Codinome Beija-Flor", cantor: "Cazuza" },
+            { msg: "Julho termina e meu carinho por você segue firme e inabalável.", musica: "Tempo Perdido", cantor: "Legião Urbana" },
+
+            // AGOSTO
+            { msg: "Agosto chega e o meu sentimento por você continua radiante. Eu te amo!", musica: "Tudo Que Eu Sempre Quis", cantor: "Pullovers" },
+            { msg: "Você é o toque de doçura que faltava no meu mundo.", musica: "Vou Morrer Sozinho", cantor: "Jão" },
+            { msg: "Amar você é a experiência mais bonita que já vivenciei.", musica: "Birds of a Feather", cantor: "Billie Eilish" },
+            { msg: "O tempo passa, mas nossa cumplicidade só se aprofunda. Eu te amo!", musica: "Memórias", cantor: "Pitty" },
+            { msg: "Você é o motivo de tantas reflexões felizes que faço no dia.", musica: "Love To Dream", cantor: "Doja Cat" },
+            { msg: "Estar em sintonia com você traz uma paz indescritível.", musica: "Junho de 94", cantor: "Djonga" },
+            { msg: "Amo suas mensagens carinhosas e cheias de atenção. Eu te amo!", musica: "Caso Sério", cantor: "Rita Lee" },
+            { msg: "Você me faz sentir seguro e respeitado todos os dias.", musica: "Dengo", cantor: "Anavitória" },
+            { msg: "Amar você é a escolha da qual mais me orgulho na vida.", musica: "Samba do Avião", cantor: "Chico Buarque" },
+            { msg: "Nosso sentimento é sincero, bonito e repleto de luz. Eu te amo!", musica: "Poesia Acústica #9", cantor: "Poesia Acústica" },
+            { msg: "Seu sorriso em fotos tem a força de afastar qualquer dia ruim.", musica: "Preciso Dizer Que Te Amo", cantor: "Cazuza" },
+            { msg: "Obrigado por me escutar sempre com tanta atenção.", musica: "Será", cantor: "Legião Urbana" },
+            { msg: "Você é o meu maior porto seguro e fonte constante de alegria. Eu te amo!", musica: "A Sombra da Partida", cantor: "Pullovers" },
+            { msg: "Nosso companheirismo torna os desafios muito mais leves.", musica: "Santo", cantor: "Jão" },
+            { msg: "Te amar renova minha energia para enfrentar qualquer obstáculo.", musica: "TV", cantor: "Billie Eilish" },
+            { msg: "Amo como cada dia ao seu lado me faz mais feliz. Eu te amo!", musica: "Máscara", cantor: "Pitty" },
+            { msg: "Você é minha bênção diária e meu maior motivo de sorrir.", musica: "I Don't Do Drugs", cantor: "Doja Cat" },
+            { msg: "Seu carinho ilumina minha alma e enche meu peito de paz.", musica: "Solitude", cantor: "Djonga" },
+            { msg: "Com você aprendi o valor da verdadeira cumplicidade. Eu te amo!", musica: "Ovelha Negra", cantor: "Rita Lee" },
+            { msg: "Meu amor por você é forte, constante e incondicional.", musica: "Explodir", cantor: "Anavitória" },
+            { msg: "Você é o meu presente mais bonito e meu futuro desejado.", musica: "Apesartar de Você", cantor: "Chico Buarque" },
+            { msg: "Amo até os detalhes do seu jeito de falar e brincar. Eu te amo!", musica: "Poesia Acústica #5", cantor: "Poesia Acústica" },
+            { msg: "Ter sua amizade e amor é saber que nunca estarei só.", musica: "Maior Abandonado", cantor: "Cazuza" },
+            { msg: "O seu apoio me transforma e me eleva todos os dias.", musica: "Quase Sem Querer", cantor: "Legião Urbana" },
+            { msg: "Você é meu abrigo seguro onde sempre posso ser eu mesmo. Eu te amo!", musica: "1999", cantor: "Pullovers" },
+            { msg: "Amar você dá um sentido todo especial para a vida.", musica: "Meninos e Meninas", cantor: "Jão" },
+            { msg: "Sua doçura acalma qualquer inquietação na minha mente.", musica: "Ocean Eyes", cantor: "Billie Eilish" },
+            { msg: "Cada conversa nossa fortalece meu carinho por você. Eu te amo!", musica: "Na Sua Estante", cantor: "Pitty" },
+            { msg: "Você é a pessoa com quem quero construir meus próximos passos.", musica: "Agora Hills", cantor: "Doja Cat" },
+            { msg: "Obrigado por fazer nosso amor ser leve, sincero e bonito.", musica: "Evolução", cantor: "Djonga" },
+            { msg: "Agosto acaba, mas nossa história de amor continua forte. Eu te amo!", musica: "Mania de Você", cantor: "Rita Lee" },
+
+            // SETEMBRO
+            { msg: "Setembro chega renovando a alegria do nosso amor. Eu te amo!", musica: "Trevo (Tu)", cantor: "Anavitória" },
+            { msg: "Te amar me faz cultivar o que de melhor existe em mim.", musica: "A Rita", cantor: "Chico Buarque" },
+            { msg: "Você é o detalhe mais bonito que o destino me deu.", musica: "Poesia Acústica #6", cantor: "Poesia Acústica" },
+            { msg: "Seu sorriso ilumina meu dia com a paz de um novo amanhã. Eu te amo!", musica: "Faz Parte Do Meu Show", cantor: "Cazuza" },
+            { msg: "Amar você renova meu coração a cada nova mensagem.", musica: "Tempo Perdido", cantor: "Legião Urbana" },
+            { msg: "O seu carinho é suave, atencioso e muito acolhedor.", musica: "Não Se Mande Embora", cantor: "Pullovers" },
+            { msg: "Com você, a vida tem a cor e a leveza do afeto sincero. Eu te amo!", musica: "Acontece", cantor: "Jão" },
+            { msg: "Obrigado por colocar tanta alegria na minha caminhada.", musica: "Everything I Wanted", cantor: "Billie Eilish" },
+            { msg: "Sua voz nas chamadas é a minha companhia preferida.", musica: "Equalize", cantor: "Pitty" },
+            { msg: "Você é a razão de grande parte da minha evolução diária. Eu te amo!", musica: "Casual", cantor: "Doja Cat" },
+            { msg: "Nosso afeto floresceu com respeito e consideração profunda.", musica: "Leal", cantor: "Djonga" },
+            { msg: "Eu te amo! Amar você é uma das melhores experiências da minha vida.", musica: "Lança Perfume", cantor: "Rita Lee" },
+            { msg: "A sua presença na minha rotina traz um frescor de felicidade.", musica: "Singular", cantor: "Anavitória" },
+            { msg: "Você é meu encanto, minha paz e minha pessoa favorita.", musica: "Eu Te Amo", cantor: "Chico Buarque" },
+            { msg: "Amo planejar momentos e conversas futuras ao seu lado. Eu te amo!", musica: "Poesia Acústica #1", cantor: "Poesia Acústica" },
+            { msg: "Compartilhar a vida com você é minha maior alegria.", musica: "Codinome Beija-Flor", cantor: "Cazuza" },
+            { msg: "Seu olhar sincero passa uma serenidade enorme.", musica: "Eduardo e Mônica", cantor: "Legião Urbana" },
+            { msg: "Amar você me faz enxergar a beleza que há em viver. Eu te amo!", musica: "O Amor Vai Salvar o Mundo", cantor: "Pullovers" },
+            { msg: "Nosso carinho se fortalece a cada conversa que temos.", musica: "Idiota", cantor: "Jão" },
+            { msg: "Obrigado por enfeitar meu cotidiano com a sua atenção.", musica: "Lovely", cantor: "Billie Eilish" },
+            { msg: "Você traz uma paz imensa para o meu interior. Eu te amo!", musica: "Teto de Vidro", cantor: "Pitty" },
+            { msg: "Amar você é um presente precioso de todos os dias.", musica: "Love To Dream", cantor: "Doja Cat" },
+            { msg: "Seu amor é semente de paz que cresceu na minha vida.", musica: "Gente Grande", cantor: "Djonga" },
+            { msg: "Amo como nos apoiamos mutuamente com dedicação. Eu te amo!", musica: "Desculpe o Auê", cantor: "Rita Lee" },
+            { msg: "Você é o meu maior motivo para sorrir durante o dia.", musica: "Fica", cantor: "Anavitória" },
+            { msg: "Nosso companheirismo torna qualquer dia especial.", musica: "João e Maria", cantor: "Chico Buarque" },
+            { msg: "Amar você faz o meu caminho ser leve e bonito. Eu te amo!", musica: "Poesia Acústica #3", cantor: "Poesia Acústica" },
+            { msg: "Você é a minha melhor companhia, mesmo à distância.", musica: "Exagerado", cantor: "Cazuza" },
+            { msg: "Obrigado por fazer do meu coração um lugar feliz.", musica: "Índios", cantor: "Legião Urbana" },
+            { msg: "Setembro termina com nosso amor mais forte do que nunca. Eu te amo!", musica: "Vinho de Morango", cantor: "Pullovers" },
+
+            // OUTUBRO
+            { msg: "Outubro começa e meu carinho por você renova-se a cada instante. Eu te amo!", musica: "Santo", cantor: "Jão" },
+            { msg: "Você é a paz da minha rotina e a alegria dos meus dias.", musica: "i love you", cantor: "Billie Eilish" },
+            
+            // --- 03 DE OUTUBRO: ANIVERSÁRIO ---
+            { msg: "🎂 PARABÉNS PELO SEU ANIVERSÁRIO, MEU AMOR! 🎉 Que o seu dia seja iluminado e repleto de sorrisos! Você é a pessoa mais incrível que conheço e merecedora de todo o amor e felicidade do mundo. Obrigado por existir, por me ouvir e por fazer minha vida infinitamente mais feliz! Eu te amo!", musica: "Equalize", cantor: "Pitty" },
+            
+            { msg: "Seu carinho afasta qualquer desânimo ou incerteza. Eu te amo!", musica: "Agora Hills", cantor: "Doja Cat" },
+            { msg: "Você é o tesouro que guardo com maior afeto no coração.", musica: "Atipico", cantor: "Djonga" },
+            { msg: "Cada dia ao seu lado é uma dádiva que agradeço imensamente.", musica: "Baila Comigo", cantor: "Rita Lee" },
+            { msg: "O seu apoio aquece meu peito e espanta a solidão. Eu te amo!", musica: "Porque Eu Te Amo", cantor: "Anavitória" },
+            { msg: "Amar você é a certeza de ter encontrado um sentimento puro.", musica: "Construção", cantor: "Chico Buarque" },
+            { msg: "A sua alegria contagia tudo e faz meu dia melhorar.", musica: "Poesia Acústica #11", cantor: "Poesia Acústica" },
+            { msg: "Obrigado por ser tão atencioso, leal e presente. Eu te amo!", musica: "Preciso Dizer Que Te Amo", cantor: "Cazuza" },
+            { msg: "O carinho que sinto por você é sincero, bonito e enorme.", musica: "Será", cantor: "Legião Urbana" },
+            { msg: "Você é meu porto seguro em qualquer momento de dúvida.", musica: "A Sombra da Partida", cantor: "Pullovers" },
+            { msg: "Estar conectado com você é encontrar paz na mente. Eu te amo!", musica: "Meninos e Meninas", cantor: "Jão" },
+            { msg: "Seu sorriso é a luz que ilumina os meus pensamentos.", musica: "Wildflower", cantor: "Billie Eilish" },
+            { msg: "Amar você me faz enxergar a vida de uma forma mais doce.", musica: "Me Adora", cantor: "Pitty" },
+            { msg: "Nosso amor cresce em bases sólidas de afeto e respeito. Eu te amo!", musica: "Casual", cantor: "Doja Cat" },
+            { msg: "Você é o parceiro de vida que pedi aos céus.", musica: "Deus É Mulher", cantor: "Djonga" },
+            { msg: "Amo o quanto nos entendemos de maneira leve.", musica: "Caso Sério", cantor: "Rita Lee" },
+            { msg: "Eu te amo! Te amar é minha alegria diária e meu maior orgulho.", musica: "Cor de Marte", cantor: "Anavitória" },
+            { msg: "A vida ficou mais feliz e tranquila desde a sua chegada.", musica: "Cotidiano", cantor: "Chico Buarque" },
+            { msg: "Você é a minha luz quando me sinto inseguro ou cansado.", musica: "Poesia Acústica #7", cantor: "Poesia Acústica" },
+            { msg: "Sua voz no áudio traz uma serenidade gigante para minha alma. Eu te amo!", musica: "Pro Dia Nascer Feliz", cantor: "Cazuza" },
+            { msg: "Obrigado por cuidar de mim com tanta consideração e carinho.", musica: "Monte Castelo", cantor: "Legião Urbana" },
+            { msg: "Amar você é um hábito que deixa meu coração tranquilo.", musica: "1999", cantor: "Pullovers" },
+            { msg: "Você é o aconchego que minha mente precisa no final do dia. Eu te amo!", musica: "Claridade", cantor: "Jão" },
+            { msg: "A beleza da nossa conexão me emociona todos os dias.", musica: "Ocean Eyes", cantor: "Billie Eilish" },
+            { msg: "300 dias de mensagens e o amor por você só continua crescendo! Eu te amo!", musica: "Admirável Chip Novo", cantor: "Pitty" },
+            { msg: "Seu amor é meu abrigo, minha paz e minha certeza.", musica: "I Don't Do Drugs", cantor: "Doja Cat" },
+            { msg: "Colecionar momentos bons ao seu lado é minha prioridade.", musica: "Solitude", cantor: "Djonga" },
+            { msg: "Te amar traz uma serenidade bonita e profunda ao meu peito. Eu te amo!", musica: "Ovelha Negra", cantor: "Rita Lee" },
+            { msg: "Outubro termina e a nossa caminhada permanece muito feliz.", musica: "Lisboa", cantor: "Anavitória" },
+
+            // NOVEMBRO
+            { msg: "Novembro chega preparando a reta final de um ano lindo. Eu te amo!", musica: "Aita", cantor: "Chico Buarque" },
+            { msg: "Você é o meu pensamento mais calmo e acolhedor.", musica: "Poesia Acústica #10", cantor: "Poesia Acústica" },
+            { msg: "Amar você enche a minha vida de gratidão diária.", musica: "Faz Parte Do Meu Show", cantor: "Cazuza" },
+            { msg: "Seu carinho é o abrigo onde me sinto compreendido. Eu te amo!", musica: "Tempo Perdido", cantor: "Legião Urbana" },
+            { msg: "Obrigado por cada palavra de incentivo que você me dá.", musica: "Olhos Vermelhos", cantor: "Pullovers" },
+            { msg: "Você é o sol que ilumina meus dias mais difíceis.", musica: "Santo", cantor: "Jão" },
+            { msg: "Nosso amor é um refúgio de paz no meio da correria. Eu te amo!", musica: "TV", cantor: "Billie Eilish" },
+            { msg: "Te amar me traz a certeza de que a vida é bonita.", musica: "Dança da Solidão", cantor: "Pitty" },
+            { msg: "A vida é generosa por ter unido nossas histórias.", musica: "Agora Hills", cantor: "Doja Cat" },
+            { msg: "Sua presença, mesmo no pensamento, é um presente. Eu te amo!", musica: "Lugar ao Sol", cantor: "Djonga" },
+            { msg: "Amo a transparência e a maturidade do nosso afeto.", musica: "Lança Perfume", cantor: "Rita Lee" },
+            { msg: "Você é meu amor, meu amigo e meu porto seguro.", musica: "Singular", cantor: "Anavitória" },
+            { msg: "Amar você transforma qualquer desafio em algo superável. Eu te amo!", musica: "Apesartar de Você", cantor: "Chico Buarque" },
+            { msg: "A doçura das suas atitudes me encanta todos os dias.", musica: "Poesia Acústica #13", cantor: "Poesia Acústica" },
+            { msg: "Obrigado por caminhar comigo com tanto respeito.", musica: "Codinome Beija-Flor", cantor: "Cazuza" },
+            { msg: "Seu sorriso em fotos renova minhas energias rapidamente. Eu te amo!", musica: "Quase Sem Querer", cantor: "Legião Urbana" },
+            { msg: "Você é a pessoa com quem quero construir todos os planos.", musica: "Tudo Que Eu Sempre Quis", cantor: "Pullovers" },
+            { msg: "Amar você me faz valorizar ainda mais o presente.", musica: "Vou Morrer Sozinho", cantor: "Jão" },
+            { msg: "Nosso laço é forte, sincero e cheio de carinho. Eu te amo!", musica: "Halley's Comet", cantor: "Billie Eilish" },
+            { msg: "Você é o maior presente que meu coração já recebeu.", musica: "Pulsos", cantor: "Pitty" },
+            { msg: "Te amar traz um sentido profundo para a minha vida.", musica: "Love To Dream", cantor: "Doja Cat" },
+            { msg: "A paz que você traz para minha rotina é inestimável. Eu te amo!", musica: "Junho de 94", cantor: "Djonga" },
+            { msg: "Amo cada risada sincera que trocamos ao telefone.", musica: "Doce Comparsa", cantor: "Rita Lee" },
+            { msg: "Você é o meu equilíbrio, minha paz e meu carinho.", musica: "Dengo", cantor: "Anavitória" },
+            { msg: "Ter seu carinho constante é o meu maior privilégio. Eu te amo!", musica: "Samba do Avião", cantor: "Chico Buarque" },
+            { msg: "Amar você me enche de entusiasmo quanto aos amanhãs.", musica: "Poesia Acústica #8", cantor: "Poesia Acústica" },
+            { msg: "Você faz do meu mundo um lugar acolhedor para se viver.", musica: "Preciso Dizer Que Te Amo", cantor: "Cazuza" },
+            { msg: "Obrigado por ser exatamente quem você é, do seu jeito lindo. Eu te amo!", musica: "Índios", cantor: "Legião Urbana" },
+            { msg: "Nosso sentimento é calmo e verdadeiro como o horizonte.", musica: "A Sombra da Partida", cantor: "Pullovers" },
+            { msg: "Novembro acaba com o coração transbordando amor por você. Eu te amo!", musica: "Acontece", cantor: "Jão" },
+
+            // DEZEMBRO
+            { msg: "Dezembro chega para fechar este ciclo lindo de amor! Eu te amo!", musica: "Happier Than Ever", cantor: "Billie Eilish" },
+            { msg: "Amar você ao longo de todo o ano foi a coisa mais linda.", musica: "Memórias", cantor: "Pitty" },
+            { msg: "Ter a sua presença na minha vida é a maior das bênçãos.", musica: "Casual", cantor: "Doja Cat" },
+            { msg: "Seu carinho ilumina meus dias mais do que qualquer festa. Eu te amo!", musica: "Leal", cantor: "Djonga" },
+            { msg: "Cada dia do ano pensando em você valeu a pena.", musica: "Coisas da Vida", cantor: "Rita Lee" },
+            { msg: "Você é a prova de que a vida sabe ser generosa.", musica: "Trevo (Tu)", cantor: "Anavitória" },
+            { msg: "Amar você é ter um refúgio de paz constante no peito. Eu te amo!", musica: "João e Maria", cantor: "Chico Buarque" },
+            { msg: "Obrigado por ser meu apoio durante todos esses meses.", musica: "Poesia Acústica #2", cantor: "Poesia Acústica" },
+            { msg: "Sua voz é o melhor abrigo nos momentos de descanso.", musica: "Exagerado", cantor: "Cazuza" },
+            { msg: "Com você aprendi a valorizar cada momento e conversa. Eu te amo!", musica: "Eduardo e Mônica", cantor: "Legião Urbana" },
+            { msg: "O amor que cultivamos é a conquista mais bonita do ano.", musica: "O Amor Vai Salvar o Mundo", cantor: "Pullovers" },
+            { msg: "Você é o meu lugar favorito no mundo inteiro.", musica: "Idiota", cantor: "Jão" },
+            { msg: "Te amar me faz querer celebrar a vida a cada instante. Eu te amo!", musica: "Lovely", cantor: "Billie Eilish" },
+            { msg: "A doçura do seu afeto acalma qualquer preocupação.", musica: "Equalize", cantor: "Pitty" },
+            { msg: "Nosso amor se renova com força a cada novo dia.", musica: "Agora Hills", cantor: "Doja Cat" },
+            { msg: "Faltam poucos dias para fechar um ciclo repleto de carinho! Eu te amo!", musica: "Gente Grande", cantor: "Djonga" },
+            { msg: "Você é a harmonia e a tranquilidade que sempre desejei.", musica: "Mania de Você", cantor: "Rita Lee" },
+            { msg: "Amar você é meu hábito preferido e meu maior orgulho.", musica: "Singular", cantor: "Anavitória" },
+            { msg: "O brilho das suas atitudes faz tudo valer a pena. Eu te amo!", musica: "Eu Te Amo", cantor: "Chico Buarque" },
+            { msg: "Obrigado por me fazer sentir a pessoa mais amada.", musica: "Poesia Acústica #9", cantor: "Poesia Acústica" },
+            { msg: "Boas Festas, meu amor! Ter você é o meu melhor presente. Eu te amo!", musica: "Codinome Beija-Flor", cantor: "Cazuza" },
+            { msg: "Nosso amor traz luz, calor e afeto em todas as estações.", musica: "Tempo Perdido", cantor: "Legião Urbana" },
+            { msg: "Amar você é viver com o coração cheio de paz e alegria. Eu te amo!", musica: "Não Se Mande Embora", cantor: "Pullovers" },
+            { msg: "Cada dia ao seu lado é uma página linda da nossa história.", musica: "Santo", cantor: "Jão" },
+            { msg: "Você é meu abrigo, minha paz e minha certeza absoluta. Eu te amo!", musica: "Birds of a Feather", cantor: "Billie Eilish" },
+            { msg: "Faltam poucos dias para recomeçarmos mais um ano unidos.", musica: "Me Adora", cantor: "Pitty" },
+            { msg: "Eu te amo com todo o meu coração e esse é o meu sentimento diário.", musica: "I Don't Do Drugs", cantor: "Doja Cat" },
+            { msg: "Obrigado por todos os momentos sorridentes deste ano.", musica: "Evolução", cantor: "Djonga" },
+            { msg: "Você é meu maior amor e minha melhor escolha todos os dias. Eu te amo!", musica: "Fica", cantor: "Anavitória" },
+            { msg: "Amanhã o ano termina, mas nosso amor continua firme para sempre.", musica: "Apesartar de Você", cantor: "Chico Buarque" },
+            { msg: "365 dias de amor, respeito e cumplicidade. Eu te amo hoje, amanhã e por toda a eternidade!", musica: "Equalize", cantor: "Pitty" }
+        ];
+
+        let mesAtualIdx = 9; // Inicia em Outubro para ver o aniversário diretamente
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthDisplay = document.getElementById('month-display');
+            grid.innerHTML = '';
+
+            monthDisplay.innerText = mesesNomes[mesAtualIdx];
+
+            // Dias da Semana no Cabeçalho
+            const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            diasSemana.forEach(dia => {
+                const header = document.createElement('div');
+                header.className = 'weekday-header';
+                header.innerText = dia;
+                grid.appendChild(header);
+            });
+
+            // Quantidade de dias no mês
+            const totalDias = diasNosMeses[mesAtualIdx];
+
+            // Calcular dia do ano acumulado
+            let diaDoAnoInicio = 0;
+            for (let i = 0; i < mesAtualIdx; i++) {
+                diaDoAnoInicio += diasNosMeses[i];
+            }
+
+            for (let d = 1; d <= totalDias; d++) {
+                const indexGeral = diaDoAnoInicio + (d - 1);
+                const itemDados = baseDeDados[indexGeral] || baseDeDados[0];
+
+                const card = document.createElement('div');
+                card.className = 'day-card';
+
+                // Destaque especial para o dia 03/10 (Aniversário)
+                if (mesAtualIdx === 9 && d === 3) {
+                    card.classList.add('special-day');
+                }
+
+                card.innerHTML = `
+                    <div class="day-number">${d}</div>
+                    <div class="day-icon">${(mesAtualIdx === 9 && d === 3) ? '🎂' : '💌'}</div>
+                `;
+
+                card.onclick = () => openModal(d, mesesNomes[mesAtualIdx], itemDados);
+                grid.appendChild(card);
+            }
+        }
+
+        function changeMonth(delta) {
+            mesAtualIdx += delta;
+            if (mesAtualIdx < 0) mesAtualIdx = 11;
+            if (mesAtualIdx > 11) mesAtualIdx = 0;
+            renderCalendar();
+        }
+
+        function openModal(dia, mes, dados) {
+            const modal = document.getElementById('modal-overlay');
+            document.getElementById('modal-date').innerText = `${dia} DE ${mes.toUpperCase()}`;
+            document.getElementById('modal-message').innerText = dados.msg;
+            document.getElementById('music-title').innerText = dados.musica;
+            document.getElementById('music-artist').innerText = dados.cantor;
+
+            // Link de busca no YouTube para tocar a música diretamente
+            const queryBusca = encodeURIComponent(`${dados.musica} ${dados.cantor}`);
+            document.getElementById('music-link').href = `https://www.youtube.com/results?search_query=${queryBusca}`;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal(event) {
+            if (event.target.id === 'modal-overlay') {
+                document.getElementById('modal-overlay').classList.remove('active');
+            }
+        }
+
+        function forceCloseModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+
+        // Renderiza o calendário ao carregar a página
+        window.onload = function() {
+            renderCalendar();
+        };
+    </script>
+</body>
+</html>
